@@ -29,7 +29,7 @@ const func = (RED: Red) => {
 
                 const chargingControl = eGoChargerCtl.trigger(message);
 
-                send([{ payload: chargingControl.doCharging }, { payload: chargingControl.chargeCurrent }]);
+                send([{ payload: "" + chargingControl.doCharging }, { payload: "" + chargingControl.chargeCurrent }]);
 
 
             }

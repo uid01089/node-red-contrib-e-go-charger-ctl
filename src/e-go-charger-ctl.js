@@ -29,7 +29,7 @@ const func = (RED) => {
                 const message = JSON.parse(msg.payload);
                 if (message !== undefined && message !== null) {
                     const chargingControl = eGoChargerCtl.trigger(message);
-                    send([{ payload: chargingControl.doCharging }, { payload: chargingControl.chargeCurrent }]);
+                    send([{ payload: "" + chargingControl.doCharging }, { payload: "" + chargingControl.chargeCurrent }]);
                 }
                 // Once finished, call 'done'.
                 // This call is wrapped in a check that 'done' exists

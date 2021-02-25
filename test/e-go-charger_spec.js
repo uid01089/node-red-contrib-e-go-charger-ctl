@@ -17,7 +17,7 @@ describe('lower-case Node', function () {
 
     const flow = [
         {
-            id: "EGoChargerId", type: "e-go-charger", name: "EGoChargerName",
+            id: "EGoChargerId", type: "e-go-charger-ctl", name: "EGoChargerName",
             wires: [["EGoChargerMqqtProvider"]]
         },
         { id: "EGoChargerMqqtProvider", type: "helper" }
@@ -31,7 +31,7 @@ describe('lower-case Node', function () {
     };
 
     it('should be loaded', function (done) {
-        var flow = [{ id: "EGoChargerId", type: "e-go-charger", name: "EGoChargerName" }];
+        var flow = [{ id: "EGoChargerId", type: "e-go-charger-ctl", name: "EGoChargerName" }];
         helper.load(lowerNode, flow, function () {
             var underTestNode = helper.getNode("EGoChargerId");
             underTestNode.should.have.property('name', 'EGoChargerName');

@@ -412,7 +412,7 @@
         "affectsGlobalScope": false
       },
       "../src_ts/e-go-charger-ctl.ts": {
-        "version": "d9cff29e18b63031a61c4550a8a561b3378aea71e0d1322f47b0cc54aa7f574b",
+        "version": "fc4baa2b6e73bc9439d59502cc6adacfcdb2fff60cbb3c1373a30d854fb86875",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "affectsGlobalScope": false
       }
