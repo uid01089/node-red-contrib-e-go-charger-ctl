@@ -16,6 +16,9 @@ const func = (RED: Red) => {
         */
         node.on("input", async function (msg, send, done) {
 
+
+            node.log(msg);
+
             // For maximum backwards compatibility, check that send exists.
             // If this node is installed in Node-RED 0.x, it will need to
             // fallback to using `node.send`

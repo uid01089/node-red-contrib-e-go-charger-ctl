@@ -167,7 +167,7 @@
         "affectsGlobalScope": false
       },
       "../src_ts/egochargerctl.ts": {
-        "version": "24d1c1933972a9093c3e0e53bf777564c0195f4d3bac4d1950c5dd2022cd3aa9",
+        "version": "bbfff5e5930e949b1c4104db82199f3c66d9a127597a5c31988ce5514c40e481",
         "signature": "a86946be1983bd5f5f4a1853c259f79f68e73587bb301a0b0f493f5e50f29f8c",
         "affectsGlobalScope": false
       },
@@ -412,7 +412,7 @@
         "affectsGlobalScope": false
       },
       "../src_ts/e-go-charger-ctl.ts": {
-        "version": "fc4baa2b6e73bc9439d59502cc6adacfcdb2fff60cbb3c1373a30d854fb86875",
+        "version": "da07c8848f972bb86d1c49e296be50b921c9de087230c1dcc18f6bb23fb7e798",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "affectsGlobalScope": false
       }

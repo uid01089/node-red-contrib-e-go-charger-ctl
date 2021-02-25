@@ -39,9 +39,9 @@ class EGoChargerCtl {
         this.loadPower = this.updateIfDefined(this.loadPower, this.getData(message, "EssInfoStatistics", "load_power"));
         this.pcs_pv_total_power = this.updateIfDefined(this.pcs_pv_total_power, this.getData(message, "EssInfoStatistics", "pcs_pv_total_power"));
         this.soc = this.updateIfDefined(this.soc, this.getData(message, "EssCommonInfoBATT", "soc"));
-        this.loadingPower1 = this.updateIfDefined(this.soc, this.getData(message, "EGoChargerStatus", "powerL1"));
-        this.loadingPower2 = this.updateIfDefined(this.soc, this.getData(message, "EGoChargerStatus", "powerL2"));
-        this.loadingPower3 = this.updateIfDefined(this.soc, this.getData(message, "EGoChargerStatus", "powerL3"));
+        this.loadingPower1 = this.updateIfDefined(this.loadingPower1, this.getData(message, "EGoChargerStatus", "powerL1"));
+        this.loadingPower2 = this.updateIfDefined(this.loadingPower2, this.getData(message, "EGoChargerStatus", "powerL2"));
+        this.loadingPower3 = this.updateIfDefined(this.loadingPower3, this.getData(message, "EGoChargerStatus", "powerL3"));
 
         if (true//
             && (undefined !== this.batConvPower) //

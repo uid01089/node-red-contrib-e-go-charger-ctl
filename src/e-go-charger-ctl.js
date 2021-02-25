@@ -21,6 +21,7 @@ const func = (RED) => {
         */
         node.on("input", function (msg, send, done) {
             return __awaiter(this, void 0, void 0, function* () {
+                node.log(msg);
                 // For maximum backwards compatibility, check that send exists.
                 // If this node is installed in Node-RED 0.x, it will need to
                 // fallback to using `node.send`
