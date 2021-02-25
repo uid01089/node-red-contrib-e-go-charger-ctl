@@ -27,7 +27,7 @@ const func = (RED: Red) => {
             const eGoChargerCtl = ((node as any).eGoChargerCtl) as EGoChargerCtl;
 
 
-            const message = JSON.parse(msg.payload);
+            const message = msg.payload;
             if (message !== undefined && message !== null) {
 
                 const chargingControl = eGoChargerCtl.trigger(message);

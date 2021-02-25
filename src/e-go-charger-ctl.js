@@ -27,7 +27,7 @@ const func = (RED) => {
                 // fallback to using `node.send`
                 send = send || function () { node.send.apply(node, arguments); };
                 const eGoChargerCtl = (node.eGoChargerCtl);
-                const message = JSON.parse(msg.payload);
+                const message = msg.payload;
                 if (message !== undefined && message !== null) {
                     const chargingControl = eGoChargerCtl.trigger(message);
                     send([{ payload: "" + chargingControl.doCharging }, { payload: "" + chargingControl.chargeCurrent }]);
