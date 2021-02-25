@@ -63,7 +63,7 @@ const func = (RED: Red) => {
         });
 
     }
-    RED.nodes.registerType("e-go-charger", eGoChargerCtl);
+    RED.nodes.registerType("e-go-charger-ctl", eGoChargerCtl);
 }
 
 module.exports = func;

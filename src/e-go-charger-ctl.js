@@ -55,7 +55,7 @@ const func = (RED) => {
             done();
         });
     };
-    RED.nodes.registerType("e-go-charger", eGoChargerCtl);
+    RED.nodes.registerType("e-go-charger-ctl", eGoChargerCtl);
 };
 module.exports = func;
 //# sourceMappingURL=e-go-charger-ctl.js.map
