@@ -1,0 +1,34 @@
+{
+  "name": "node-red-contrib-e-go-charger-ctl",
+  "version": "0.0.1",
+  "description": "Split the message catalog from zigbee2mqqt into single messages",
+  "main": "./src/e-go-charger-ctl.js",
+  "repository": {
+    "url": "https://github.com/uid01089/node-red-contrib-e-go-charger-ctl.git"
+  },
+  "node-red": {
+    "nodes": {
+      "e-go-charger-ctl": "src/e-go-charger-ctl.js"
+    }
+  },
+  "scripts": {
+    "test": "mocha \"test/**/*_spec.js\"",
+    "build-ts": "tsc"
+  },
+  "author": "",
+  "license": "Apache-2.0 License",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.14.2",
+    "@types/node-red": "^0.20.0",
+    "@typescript-eslint/eslint-plugin": "^3.9.0",
+    "@typescript-eslint/parser": "^3.9.0",
+    "eslint": "^7.7.0",
+    "eslint-plugin-mocha": "^8.0.0",
+    "mocha": "^8.1.2",
+    "node-red": "^1.1.3",
+    "node-red-node-test-helper": "^0.2.5",
+    "typescript": "^3.9.7",
+    "typescript-tslint-plugin": "^0.5.5"
+  }
+}
