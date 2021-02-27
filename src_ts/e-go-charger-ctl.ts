@@ -4,7 +4,10 @@ import { EGoChargerCtl } from "./EGoChargerCtl";
 const func = (RED: Red) => {
     const eGoChargerCtl = function (config: NodeProperties) {
 
-        this.eGoChargerCtl = new EGoChargerCtl();
+        this.nrPhases = (config as any).nrPhases;
+        this.minCurrent = (config as any).minCurrent;
+
+        this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent);
         const node: Node = this;
 
         RED.nodes.createNode(node, config);

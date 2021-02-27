@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const EGoChargerCtl_1 = require("./EGoChargerCtl");
 const func = (RED) => {
     const eGoChargerCtl = function (config) {
-        this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl();
+        this.nrPhases = config.nrPhases;
+        this.minCurrent = config.minCurrent;
+        this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl(this.nrPhases, this.minCurrent);
         const node = this;
         RED.nodes.createNode(node, config);
         /**

@@ -2,8 +2,7 @@
 import { InfluxDBBatchElement } from "./InfluxDBBatchElement";
 
 
-const NUMBER_LINES = 1;
-const AMP_MIN = 6;
+
 const AMP_MAX = 13;
 const V_GRID = 230;
 
@@ -22,16 +21,19 @@ class EGoChargerCtl {
     loadingPower1: number;
     loadingPower2: number;
     loadingPower3: number;
+    nrPhases: number;
+    minCurrent: number;
 
-    constructor() {
-        //
+    constructor(nrPhases: number, minCurrent: number) {
+        this.nrPhases = nrPhases;
+        this.minCurrent = minCurrent;
     }
 
 
     trigger(message: InfluxDBBatchElement[]): ChargingControl {
 
         let chargingControl: ChargingControl = {
-            chargeCurrent: AMP_MIN, doCharging: false
+            chargeCurrent: this.minCurrent, doCharging: false
         };
 
         this.batConvPower = this.updateIfDefined(this.batConvPower, this.getData(message, "EssInfoStatistics", "batconv_power"));
@@ -63,16 +65,18 @@ class EGoChargerCtl {
     }
     private control(): ChargingControl {
         let doCharging = false;
-        let chargeCurrent = AMP_MIN;
+        let chargeCurrent = this.minCurrent;
 
         const loadingPower = this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
         const neededPowerForHome = this.loadPower - loadingPower;
         const availablePowerForLoading = this.pcs_pv_total_power - neededPowerForHome;
-        const availableCurrent = Math.floor((availablePowerForLoading / NUMBER_LINES) / V_GRID);
+        if (availablePowerForLoading > 0) {
+            const availableCurrent = Math.floor((availablePowerForLoading / this.nrPhases) / V_GRID);
 
-        if (availableCurrent > AMP_MIN) {
-            chargeCurrent = Math.min(availableCurrent, AMP_MAX);
-            doCharging = true;
+            if (availableCurrent > this.minCurrent) {
+                chargeCurrent = Math.min(availableCurrent, AMP_MAX);
+                doCharging = true;
+            }
         }
 
         return { chargeCurrent: chargeCurrent, doCharging: doCharging };

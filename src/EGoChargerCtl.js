@@ -1,17 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EGoChargerCtl = void 0;
-const NUMBER_LINES = 1;
-const AMP_MIN = 6;
 const AMP_MAX = 13;
 const V_GRID = 230;
 class EGoChargerCtl {
-    constructor() {
-        //
+    constructor(nrPhases, minCurrent) {
+        this.nrPhases = nrPhases;
+        this.minCurrent = minCurrent;
     }
     trigger(message) {
         let chargingControl = {
-            chargeCurrent: AMP_MIN, doCharging: false
+            chargeCurrent: this.minCurrent, doCharging: false
         };
         this.batConvPower = this.updateIfDefined(this.batConvPower, this.getData(message, "EssInfoStatistics", "batconv_power"));
         this.gridPower = this.updateIfDefined(this.gridPower, this.getData(message, "EssInfoStatistics", "grid_power"));
@@ -38,14 +37,16 @@ class EGoChargerCtl {
     }
     control() {
         let doCharging = false;
-        let chargeCurrent = AMP_MIN;
+        let chargeCurrent = this.minCurrent;
         const loadingPower = this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
         const neededPowerForHome = this.loadPower - loadingPower;
         const availablePowerForLoading = this.pcs_pv_total_power - neededPowerForHome;
-        const availableCurrent = Math.floor((availablePowerForLoading / NUMBER_LINES) / V_GRID);
-        if (availableCurrent > AMP_MIN) {
-            chargeCurrent = Math.min(availableCurrent, AMP_MAX);
-            doCharging = true;
+        if (availablePowerForLoading > 0) {
+            const availableCurrent = Math.floor((availablePowerForLoading / this.nrPhases) / V_GRID);
+            if (availableCurrent > this.minCurrent) {
+                chargeCurrent = Math.min(availableCurrent, AMP_MAX);
+                doCharging = true;
+            }
         }
         return { chargeCurrent: chargeCurrent, doCharging: doCharging };
     }
