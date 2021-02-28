@@ -167,7 +167,7 @@
         "affectsGlobalScope": false
       },
       "../src_ts/egochargerctl.ts": {
-        "version": "205441ccdcbaf66daebb53c3f29564c502250f4dd42f84171e56c1dbf6f1985c",
+        "version": "165664cda9d4502db4f5502cc36bb018467653e2a29c472a33d86674991f9964",
         "signature": "c775f663fd36e888b8ce7ef5fa3dfddac2e2ed6524b0101cbeb8b6522a885437",
         "affectsGlobalScope": false
       },

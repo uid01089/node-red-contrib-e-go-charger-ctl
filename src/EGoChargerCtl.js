@@ -39,7 +39,7 @@ class EGoChargerCtl {
         let doCharging = false;
         let chargeCurrent = this.minCurrent;
         const loadingPower = this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
-        const neededPowerForHome = this.loadPower - loadingPower;
+        const neededPowerForHome = -1 * (this.loadPower + loadingPower); //loadPower is negative
         const availablePowerForLoading = this.pcs_pv_total_power - neededPowerForHome;
         if (availablePowerForLoading > 0) {
             const availableCurrent = Math.floor((availablePowerForLoading / this.nrPhases) / V_GRID);
