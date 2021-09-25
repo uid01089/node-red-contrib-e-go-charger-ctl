@@ -7,10 +7,14 @@
         defaults: {
             name: { value: "" },
             nrPhases: { value: 1 },
-            minCurrent: { value: 7 },
+            minCurrent: { value: 6 },
+            switchOnCurrent: { value: 7 },
+            essAccuThreshold: { value: 80 },
+
+
         },
         inputs: 1,
-        outputs: 2,
+        outputs: 5,
         icon: "file.png",
         label: function () {
             return this.name || "e-go-charger-ctl";
@@ -30,7 +34,15 @@
     <div class="form-row">
         <label for="node-input-minCurrent"><i class="fa fa-tag"></i> Minimal Current</label>
         <input type="text" id="node-input-minCurrent" placeholder="7">
-    </div>    
+    </div>   
+    <div class="form-row">
+        <label for="node-input-switchOnCurrent"><i class="fa fa-tag"></i> Switch on Current</label>
+        <input type="text" id="node-input-switchOnCurrent" placeholder="7">
+    </div>      
+    <div class="form-row">
+        <label for="node-input-essAccuThreshold"><i class="fa fa-tag"></i> Ess-Accu-Threshold %</label>
+        <input type="text" id="node-input-essAccuThreshold" placeholder="80">
+    </div>        
 
 </script>
 
@@ -63,5 +75,23 @@
                  <dd>The current which shall be used for charging</dd>
              </dl>
          </li>
+        <li>chargeMode
+             <dl class="message-properties">
+                 <dt>Payload <span class="property-type">string</span></dt>
+                 <dd>The mode of charging</dd>
+             </dl>
+         </li>    
+        <li>mqqt-stream
+             <dl class="message-properties">
+                 <dt>Payload <span class="property-type">string</span></dt>
+                 <dd>Mqqt-output</dd>
+             </dl>
+         </li>  
+        <li>InfluxDb-stream
+             <dl class="message-properties">
+                 <dt>Payload <span class="property-type">string</span></dt>
+                 <dd>InfluxDb-output</dd>
+             </dl>
+         </li>                          
      </ol>
 </script>

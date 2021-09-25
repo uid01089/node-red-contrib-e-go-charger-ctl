@@ -161,14 +161,29 @@
         "signature": "89bf2b7a601b73ea4311eda9c41f86a58994fec1bee3b87c4a14d68d9adcdcbd",
         "affectsGlobalScope": true
       },
+      "../src_ts/debounce.ts": {
+        "version": "5b8cb1e38fb5f8f304a983f35d5323bab24d05ba1834dca4e2b2b2c7835c1430",
+        "signature": "ed76e1715e9e6d0c2cfdb0539df31ff233ff925018c62fc42daf7d6a970d89ee",
+        "affectsGlobalScope": false
+      },
       "../src_ts/influxdbbatchelement.ts": {
         "version": "0bffa4d01b9f63e239a01b9122e2d80f35f25203314e921325957ee8bdb6212b",
         "signature": "c08d508d12c98c15f46ebb52bf074c127fc61c39d4180351616a098cd3d8b327",
         "affectsGlobalScope": false
       },
       "../src_ts/egochargerctl.ts": {
-        "version": "165664cda9d4502db4f5502cc36bb018467653e2a29c472a33d86674991f9964",
-        "signature": "c775f663fd36e888b8ce7ef5fa3dfddac2e2ed6524b0101cbeb8b6522a885437",
+        "version": "1bab44cc35c85fb2f10a9e56a17940a953d9cd7eaa2c9e52d455794078328917",
+        "signature": "81d8b56d2e4e25307179603087069db9a743541f94bd82e61038d76514e8058e",
+        "affectsGlobalScope": false
+      },
+      "../src_ts/throttle.ts": {
+        "version": "f2722ca43bb6d1ea2fef688b6ec977481ebe04fd2e414e22b9f72cdc7c57fe20",
+        "signature": "4743a27abbfcea34247c8a8b3c4e9bc21e1a21dd2ec73190e4956e05498afec3",
+        "affectsGlobalScope": false
+      },
+      "../src_ts/util.ts": {
+        "version": "0b577677c6b48117665877a13c3f2c8288cf61496a42e84a8739b6d115015a7e",
+        "signature": "25d83a03baad4b56c29ba04270fbe442afdb94f5b1f7d099716b3ec17c20cbc4",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/globals.d.ts": {
@@ -412,7 +427,7 @@
         "affectsGlobalScope": false
       },
       "../src_ts/e-go-charger-ctl.ts": {
-        "version": "d9f1b1819f29c7eac53756b8148b0d45a71c63213963f0b346a8aab07c376223",
+        "version": "26109c5dade2767e7cf2f063cd5490397d5831cb6e1ab2398ed728939cc7ba60",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "affectsGlobalScope": false
       }
@@ -609,7 +624,8 @@
       ],
       "../src_ts/e-go-charger-ctl.ts": [
         "../node_modules/@types/node-red/index.d.ts",
-        "../src_ts/egochargerctl.ts"
+        "../src_ts/egochargerctl.ts",
+        "../src_ts/throttle.ts"
       ],
       "../src_ts/egochargerctl.ts": [
         "../src_ts/influxdbbatchelement.ts"
@@ -872,9 +888,12 @@
       "../node_modules/typescript/lib/lib.esnext.intl.d.ts",
       "../node_modules/typescript/lib/lib.scripthost.d.ts",
       "../node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "../src_ts/debounce.ts",
       "../src_ts/e-go-charger-ctl.ts",
       "../src_ts/egochargerctl.ts",
-      "../src_ts/influxdbbatchelement.ts"
+      "../src_ts/influxdbbatchelement.ts",
+      "../src_ts/throttle.ts",
+      "../src_ts/util.ts"
     ]
   },
   "version": "3.9.7"

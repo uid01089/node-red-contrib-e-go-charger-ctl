@@ -13,7 +13,8 @@
   },
   "scripts": {
     "test": "mocha \"test/**/*_spec.js\"",
-    "build-ts": "tsc"
+    "build-ts": "tsc",
+    "deploy": "sh ./deploy.sh"
   },
   "author": "",
   "license": "Apache-2.0 License",
