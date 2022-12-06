@@ -1,25 +1,44 @@
-import { Node, Red, NodeProperties } from "node-red";
+import { NodeProperties, Red, Node, Message } from "./node-red-types"
 import { EGoChargerCtl, InfluxDBEGoChargerCtl } from "./EGoChargerCtl";
 import { Throttle } from "./Throttle";
 
+interface MyNodeProperties extends NodeProperties {
+    nrPhases: string;
+    minCurrent: string;
+    essAccuThreshold: string;
+    switchOnCurrent: string;
+
+}
+
+interface MyNode extends Node {
+    log(msg: Message): unknown;
+    nrPhases: number;
+    minCurrent: number;
+    essAccuThreshold: number;
+    switchOnCurrent: number;
+    eGoChargerCtl: EGoChargerCtl;
+    mqqtOld: string;
+    throttle: Throttle;
+}
 interface PayLoadMsg {
     payload: string;
 }
 
 
 const func = (RED: Red) => {
-    const eGoChargerCtl = function (config: NodeProperties) {
+    const eGoChargerCtl = function (config: MyNodeProperties) {
 
-        this.nrPhases = parseFloat((config as any).nrPhases);
-        this.minCurrent = parseFloat((config as any).minCurrent);
-        this.essAccuThreshold = parseFloat((config as any).essAccuThreshold);
-        this.switchOnCurrent = parseFloat((config as any).switchOnCurrent);
+        this.nrPhases = parseFloat(config.nrPhases);
+        this.minCurrent = parseFloat(config.minCurrent);
+        this.essAccuThreshold = parseFloat(config.essAccuThreshold);
+        this.switchOnCurrent = parseFloat(config.switchOnCurrent);
 
         this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent);
         this.throttle = new Throttle(60000);
         this.mqqtOld = "";
 
-        const node: Node = this;
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const node: MyNode = this;
 
         RED.nodes.createNode(node, config);
 
@@ -29,31 +48,29 @@ const func = (RED: Red) => {
          * to receive messages from the up-stream nodes in a flow.
         */
         node.on("input", async function (msg, send, done) {
-
-            const throttle = ((node as any).throttle) as Throttle;
-            const eGoChargerCtl = ((node as any).eGoChargerCtl) as EGoChargerCtl;
-
-
-            const message = msg.payload;
-
-            if (message !== undefined && message !== null) {
-
-                // Always handle message
-                const chargingControl = eGoChargerCtl.trigger(message);
+            try {
+                const throttle = node.throttle;
+                const eGoChargerCtl = node.eGoChargerCtl;
 
 
-                // Every 1 Minute do needfull things
-                throttle.trigger(() => {
+                const message = msg.payload;
 
-                    node.log(msg);
+                if (message !== undefined && message !== null) {
 
-                    // For maximum backwards compatibility, check that send exists.
-                    // If this node is installed in Node-RED 0.x, it will need to
-                    // fallback to using `node.send`
-                    send = send || function () { node.send.apply(node, arguments) }
+                    // Always handle message
+                    const chargingControl = eGoChargerCtl.trigger(message);
 
 
+                    // Every 1 Minute do needfull things
+                    throttle.trigger(() => {
 
+                        node.log(msg);
+
+                        // For maximum backwards compatibility, check that send exists.
+                        // If this node is installed in Node-RED 0.x, it will need to
+                        // fallback to using `node.send`
+                        // eslint-disable-next-line prefer-spread, prefer-rest-params
+                        send = send || function () { node.send.apply(node, arguments) }
 
 
 
@@ -61,38 +78,43 @@ const func = (RED: Red) => {
 
 
 
-                    let mqqt: PayLoadMsg[] = null;
-                    if (chargingControl.isCarConnected) {
-                        mqqt = [
-                            { payload: "alw=" + (chargingControl.doCharging ? 1 : 0) },
-                            { payload: "amx=" + chargingControl.chargeCurrent },
-                        ];
-                    }
-
-                    // Check if different compared with predecessor
-                    if (JSON.stringify(mqqt) !== ((node as any).mqqtOld)) {
-                        ((node as any).mqqtOld) = JSON.stringify(mqqt);
-                    } else {
-                        // Don't trigger mqqt
-                        mqqt = null;
-                    }
 
 
-                    send([
-                        { payload: "" + chargingControl.doCharging },
-                        { payload: "" + chargingControl.chargeCurrent },
-                        { payload: "" + chargingControl.mode },
-                        mqqt,
-                        (chargingControl.influxDb !== null ? { payload: [chargingControl.influxDb] } : null)
-                    ]);
 
-                });
+                        let mqqt: PayLoadMsg[] = null;
+
+                        if (chargingControl.isCarConnected) {
+                            mqqt = [
+                                { payload: "alw=" + (chargingControl.doCharging ? 1 : 0) },
+                                { payload: "amx=" + chargingControl.chargeCurrent },
+                            ];
+                        }
+
+                        // Check if different compared with predecessor
+                        if (JSON.stringify(mqqt) !== node.mqqtOld) {
+                            node.mqqtOld = JSON.stringify(mqqt);
+                        } else {
+                            // Don't trigger mqqt
+                            mqqt = null;
+                        }
+
+
+                        send([
+                            { payload: "" + chargingControl.doCharging },
+                            { payload: "" + chargingControl.chargeCurrent },
+                            { payload: "" + chargingControl.mode },
+                            mqqt,
+                            (chargingControl.influxDb !== null ? { payload: [chargingControl.influxDb] } : null)
+                        ]);
+
+                    });
+
+                }
 
             }
-
-
-
-
+            catch (e: unknown) {
+                console.error(e);
+            }
 
             // Once finished, call 'done'.
             // This call is wrapped in a check that 'done' exists
@@ -111,7 +133,7 @@ const func = (RED: Red) => {
          * disconnecting from a remote system, they should register a listener 
          * on the close event.
         */
-        node.on('close', function (removed, done) {
+        node.on('close', function (removed: boolean, done: () => void) {
             if (removed) {
                 // This node has been disabled/deleted
             } else {
