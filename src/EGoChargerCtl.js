@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EGoChargerCtl = void 0;
+const Model_1 = require("./Model");
 const AMP_MAX = 16;
 const V_GRID = 230;
 class EGoChargerCtl {
@@ -10,85 +11,81 @@ class EGoChargerCtl {
         this.essAccuThreshold = essAccuThreshold;
         this.switchOnCurrent = switchOnCurrent;
         this.doCharging = false;
+        this.model = new Model_1.Model();
     }
     trigger(message) {
         let chargingControl = {
-            chargeCurrent: this.minCurrent, doCharging: false, mode: "NO MODE", isCarConnected: false, influxDb: null
+            chargeCurrent: this.minCurrent,
+            doCharging: false,
+            mode: "NO MODE",
+            isCarConnected: false,
+            influxDb: null
         };
-        this.batConvPower = this.updateIfDefined(this.batConvPower, this.getData(message, "EssInfoStatistics", "batconv_power"));
-        this.gridPower = this.updateIfDefined(this.gridPower, this.getData(message, "EssInfoStatistics", "grid_power"));
-        this.loadPower = this.updateIfDefined(this.loadPower, this.getData(message, "EssInfoStatistics", "load_power"));
-        this.pcs_pv_total_power = this.updateIfDefined(this.pcs_pv_total_power, this.getData(message, "EssInfoStatistics", "pcs_pv_total_power"));
-        this.soc = this.updateIfDefined(this.soc, this.getData(message, "EssCommonInfoBATT", "soc"));
-        this.loadingPower1 = this.updateIfDefined(this.loadingPower1, this.getData(message, "EGoChargerStatus", "powerL1"));
-        this.loadingPower2 = this.updateIfDefined(this.loadingPower2, this.getData(message, "EGoChargerStatus", "powerL2"));
-        this.loadingPower3 = this.updateIfDefined(this.loadingPower3, this.getData(message, "EGoChargerStatus", "powerL3"));
-        this.status = this.updateIfDefined(this.loadingPower3, this.getData(message, "EGoChargerStatus", "status"));
-        if (true //
-            && (undefined !== this.batConvPower) //
-            && (undefined !== this.gridPower) //
-            && (undefined !== this.loadPower) //
-            && (undefined !== this.pcs_pv_total_power) //
-            && (undefined !== this.soc) //
-            && (undefined !== this.loadingPower1) //
-            && (undefined !== this.loadingPower2) //
-            && (undefined !== this.loadingPower3) //
-            && (undefined !== this.status) //
-        ) {
+        // feeding model with new message
+        this.model.trigger(message);
+        if (this.model.isModelConsistent()) {
             // All needed values available, do controlling
-            if (this.soc < this.essAccuThreshold) {
-                chargingControl = this.control(true);
-            }
-            else {
-                chargingControl = this.control(false);
-            }
-            if (1 !== this.status) {
+            chargingControl = this.control();
+            if (1 !== this.model.getStatus()) {
                 chargingControl.isCarConnected = true;
             }
         }
         return chargingControl;
     }
-    calcAvailablePower() {
-        const loadingPower = this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
-        const neededPowerForHome = -1 * (this.loadPower + loadingPower); //loadPower is negative
-        const availablePowerForLoading = this.pcs_pv_total_power - neededPowerForHome;
-        return availablePowerForLoading;
+    calcChargeCurrent(prioEssLoading, availableCurrent) {
+        let chargeCurrent = 0;
+        if (prioEssLoading) {
+            // the ESS-Battery shall be loaded. Limit the charge current to the switchOnCurrent. Rest is going into the ESS-Battery.
+            chargeCurrent = Math.min(availableCurrent, this.switchOnCurrent);
+        }
+        else {
+            // No special mode, just use the available current
+            chargeCurrent = availableCurrent;
+        }
+        // Not more then 16 Ampere!
+        return Math.min(chargeCurrent, AMP_MAX);
     }
-    control(prioEssLoading) {
+    control() {
+        const prioEssLoading = this.model.getSoc() < this.essAccuThreshold;
         //prioEssLoading: Limit chargeCurrent to this.switchOnCurrent
         //!prioEssLoading (Car-Loading): as much as available
-        const availablePowerForLoading = this.calcAvailablePower();
+        const availablePowerForLoading = this.model.calcAvailablePower();
         const availableCurrent = Math.floor((availablePowerForLoading / this.nrPhases) / V_GRID);
-        const chargeCurrentCalc = Math.min((prioEssLoading ? Math.min(availableCurrent, this.switchOnCurrent) : availableCurrent), AMP_MAX);
+        const chargeCurrentCalc = this.calcChargeCurrent(prioEssLoading, availableCurrent);
         let chargeCurrent = 0;
         if (availablePowerForLoading > 0) {
             // We have additional power available. Do charging
-            if (!this.doCharging) {
-                // we have to reach switchOnCurrent
-                if (availableCurrent >= this.switchOnCurrent) {
-                    this.doCharging = true;
-                    chargeCurrent = chargeCurrentCalc;
-                }
-                else {
-                    this.doCharging = false;
-                }
-            }
-            else {
-                if (availableCurrent >= this.minCurrent) {
+            switch (this.doCharging) {
+                case true:
                     // we are in charging mode, have to stay above minCurrent
-                    chargeCurrent = chargeCurrentCalc;
-                }
-                else {
-                    if (!prioEssLoading) {
-                        // we are over 80%, we can go on loading with this.minCurrent, even minCurrent is not reached
-                        // ESS us discharged
-                        chargeCurrent = this.minCurrent;
+                    if (availableCurrent >= this.minCurrent) {
+                        // go on charging with current calculated charging current
+                        chargeCurrent = chargeCurrentCalc;
                     }
                     else {
-                        // Nothing. Stop charging of the car.
+                        // Oh no, we are under minCurrent. Usually we shall stop charging
+                        if (prioEssLoading) {
+                            // ESS loading has higher priority, stop charging of the car
+                            this.doCharging = false;
+                        }
+                        else {
+                            // Everything for the car
+                            // we are over 80%, we can go on loading with this.minCurrent, even minCurrent is not reached
+                            // ESS us discharged
+                            chargeCurrent = this.minCurrent;
+                        }
+                    }
+                    break;
+                case false:
+                    // we have to reach switchOnCurrent
+                    if (availableCurrent >= this.switchOnCurrent) {
+                        this.doCharging = true;
+                        chargeCurrent = chargeCurrentCalc;
+                    }
+                    else {
                         this.doCharging = false;
                     }
-                }
+                    break;
             }
         }
         else {
@@ -115,24 +112,6 @@ class EGoChargerCtl {
                 }
             }
         };
-    }
-    updateIfDefined(oldValue, newValue) {
-        let value = oldValue;
-        if (undefined !== newValue) {
-            value = newValue;
-        }
-        return value;
-    }
-    getData(batch, measurement, parameter) {
-        let returnValue = undefined;
-        for (const element of batch) {
-            if (element.measurement === measurement) {
-                const fields = element.fields;
-                returnValue = fields[parameter];
-                break;
-            }
-        }
-        return returnValue;
     }
 }
 exports.EGoChargerCtl = EGoChargerCtl;

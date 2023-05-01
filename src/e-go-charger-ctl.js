@@ -30,43 +30,23 @@ const func = (RED) => {
         node.on("input", function (msg, send, done) {
             return __awaiter(this, void 0, void 0, function* () {
                 try {
-                    const throttle = node.throttle;
                     const eGoChargerCtl = node.eGoChargerCtl;
                     const message = msg.payload;
                     if (message !== undefined && message !== null) {
                         // Always handle message
                         const chargingControl = eGoChargerCtl.trigger(message);
-                        // Every 1 Minute do needfull things
-                        throttle.trigger(() => {
-                            node.log(msg);
-                            // For maximum backwards compatibility, check that send exists.
-                            // If this node is installed in Node-RED 0.x, it will need to
-                            // fallback to using `node.send`
-                            // eslint-disable-next-line prefer-spread, prefer-rest-params
-                            send = send || function () { node.send.apply(node, arguments); };
-                            let mqqt = null;
-                            if (chargingControl.isCarConnected) {
-                                mqqt = [
-                                    { payload: "alw=" + (chargingControl.doCharging ? 1 : 0) },
-                                    { payload: "amx=" + chargingControl.chargeCurrent },
-                                ];
-                            }
-                            // Check if different compared with predecessor
-                            if (JSON.stringify(mqqt) !== node.mqqtOld) {
-                                node.mqqtOld = JSON.stringify(mqqt);
-                            }
-                            else {
-                                // Don't trigger mqqt
-                                mqqt = null;
-                            }
-                            send([
-                                { payload: "" + chargingControl.doCharging },
-                                { payload: "" + chargingControl.chargeCurrent },
-                                { payload: "" + chargingControl.mode },
-                                mqqt,
-                                (chargingControl.influxDb !== null ? { payload: [chargingControl.influxDb] } : null)
-                            ]);
-                        });
+                        node.log(msg);
+                        // For maximum backwards compatibility, check that send exists.
+                        // If this node is installed in Node-RED 0.x, it will need to
+                        // fallback to using `node.send`
+                        // eslint-disable-next-line prefer-spread, prefer-rest-params
+                        send = send || function () { node.send.apply(node, arguments); };
+                        send([
+                            { payload: "" + chargingControl.doCharging },
+                            { payload: "" + chargingControl.chargeCurrent },
+                            { payload: "" + chargingControl.mode },
+                            (chargingControl.influxDb !== null ? { payload: [chargingControl.influxDb] } : null)
+                        ]);
                     }
                 }
                 catch (e) {

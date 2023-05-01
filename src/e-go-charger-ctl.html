@@ -14,7 +14,7 @@
 
         },
         inputs: 1,
-        outputs: 5,
+        outputs: 4,
         icon: "file.png",
         label: function () {
             return this.name || "e-go-charger-ctl";
@@ -41,7 +41,7 @@
     </div>      
     <div class="form-row">
         <label for="node-input-essAccuThreshold"><i class="fa fa-tag"></i> Ess-Accu-Threshold %</label>
-        <input type="text" id="node-input-essAccuThreshold" placeholder="80">
+        <input type="text" id="node-input-essAccuThreshold" placeholder="60">
     </div>        
 
 </script>
@@ -81,12 +81,6 @@
                  <dd>The mode of charging</dd>
              </dl>
          </li>    
-        <li>mqqt-stream
-             <dl class="message-properties">
-                 <dt>Payload <span class="property-type">string</span></dt>
-                 <dd>Mqqt-output</dd>
-             </dl>
-         </li>  
         <li>InfluxDb-stream
              <dl class="message-properties">
                  <dt>Payload <span class="property-type">string</span></dt>
