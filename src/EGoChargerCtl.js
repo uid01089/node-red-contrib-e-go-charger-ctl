@@ -75,7 +75,6 @@ class EGoChargerCtl {
                             // Everything for the car
                             // we are over 80%, we can go on loading with this.minCurrent, even minCurrent is not reached
                             // ESS us discharged
-                            this.piController.setStartValue(currentCurrent);
                             chargeCurrent = Math.max(this.piController.updateWithValue(currentCurrent, this.minCurrent), this.minCurrent);
                         }
                     }
@@ -84,7 +83,8 @@ class EGoChargerCtl {
                     // we have to reach switchOnCurrent
                     if (availableCurrent >= this.switchOnCurrent) {
                         this.doCharging = true;
-                        chargeCurrent = this.piController.updateWithValue(currentCurrent, chargeCurrentCalculated);
+                        this.piController.setStartValue(currentCurrent);
+                        chargeCurrent = chargeCurrentCalculated;
                     }
                     else {
                         this.doCharging = false;
