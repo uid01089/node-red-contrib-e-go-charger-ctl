@@ -10,7 +10,10 @@
             minCurrent: { value: 6 },
             switchOnCurrent: { value: 7 },
             essAccuThreshold: { value: 80 },
-
+            Kp: { value: 0.0 },
+            Ki: { value: 0.5 },
+            Kd: { value: 0.0 },
+            sampleTime: { value: 1 },
 
         },
         inputs: 1,
@@ -40,9 +43,25 @@
         <input type="text" id="node-input-switchOnCurrent" placeholder="7">
     </div>      
     <div class="form-row">
-        <label for="node-input-essAccuThreshold"><i class="fa fa-tag"></i> Ess-Accu-Threshold %</label>
+        <label for="node-input-essAccuThreshold"><i class="fa fa-tag"></i> Ess-Accu-Threshold [%]</label>
         <input type="text" id="node-input-essAccuThreshold" placeholder="60">
-    </div>        
+    </div>   
+    <div class="form-row">
+        <label for="node-input-Kp"><i class="fa fa-tag"></i> Kp </label>
+        <input type="text" id="node-input-Kp" placeholder="0.0">
+    </div>              
+    <div class="form-row">
+        <label for="node-input-Ki"><i class="fa fa-tag"></i> Ki</label>
+        <input type="text" id="node-input-Ki" placeholder="0.5">
+    </div>     
+    <div class="form-row">
+        <label for="node-input-Kd"><i class="fa fa-tag"></i> Kd</label>
+        <input type="text" id="node-input-Kd" placeholder="0.0">
+    </div>              
+    <div class="form-row">
+        <label for="node-inputsampleTime"><i class="fa fa-tag"></i> sampleTime [s]</label>
+        <input type="text" id="node-input-sampleTime" placeholder="1">
+    </div>              
 
 </script>
 

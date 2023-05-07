@@ -1,6 +1,7 @@
 
 import { InfluxDBBatchElement } from "./InfluxDBBatchElement";
 import { Model } from "./Model";
+import { PIDController } from "./PIDController";
 
 
 
@@ -37,14 +38,17 @@ class EGoChargerCtl {
     switchOnCurrent: number;
     doCharging: boolean;
     model: Model;
+    piController: PIDController;
 
-    constructor(nrPhases: number, minCurrent: number, essAccuThreshold: number, switchOnCurrent: number) {
+
+    constructor(nrPhases: number, minCurrent: number, essAccuThreshold: number, switchOnCurrent: number, piController: PIDController) {
         this.nrPhases = nrPhases;
         this.minCurrent = minCurrent;
         this.essAccuThreshold = essAccuThreshold;
         this.switchOnCurrent = switchOnCurrent;
         this.doCharging = false;
-        this.model = new Model()
+        this.model = new Model();
+        this.piController = piController;
     }
 
 
@@ -108,8 +112,9 @@ class EGoChargerCtl {
 
 
         const availablePowerForLoading = this.model.calcAvailablePower();
-        const availableCurrent = Math.floor((availablePowerForLoading / this.nrPhases) / V_GRID);
-        const chargeCurrentCalc = this.calcChargeCurrent(prioEssLoading, availableCurrent);
+        const currentCurrent = Math.round((this.model.currentLoadingPower() / this.nrPhases) / V_GRID);
+        const availableCurrent = Math.round((availablePowerForLoading / this.nrPhases) / V_GRID);
+        const chargeCurrentCalculated = this.calcChargeCurrent(prioEssLoading, availableCurrent);
         let chargeCurrent = 0;
 
         if (availablePowerForLoading > 0) {
@@ -123,7 +128,7 @@ class EGoChargerCtl {
                     if (availableCurrent >= this.minCurrent) {
 
                         // go on charging with current calculated charging current
-                        chargeCurrent = chargeCurrentCalc;
+                        chargeCurrent = this.piController.updateWithValue(currentCurrent, chargeCurrentCalculated);
 
                     } else {
 
@@ -133,13 +138,15 @@ class EGoChargerCtl {
 
                             // ESS loading has higher priority, stop charging of the car
                             this.doCharging = false;
+                            this.piController.reset();
 
                         } else {
 
                             // Everything for the car
                             // we are over 80%, we can go on loading with this.minCurrent, even minCurrent is not reached
                             // ESS us discharged
-                            chargeCurrent = this.minCurrent;
+                            this.piController.setStartValue(currentCurrent);
+                            chargeCurrent = Math.max(this.piController.updateWithValue(currentCurrent, this.minCurrent), this.minCurrent);
 
 
                         }
@@ -150,9 +157,10 @@ class EGoChargerCtl {
                     // we have to reach switchOnCurrent
                     if (availableCurrent >= this.switchOnCurrent) {
                         this.doCharging = true;
-                        chargeCurrent = chargeCurrentCalc;
+                        chargeCurrent = this.piController.updateWithValue(currentCurrent, chargeCurrentCalculated);
                     } else {
                         this.doCharging = false;
+                        this.piController.reset();
                     }
                     break;
             }
@@ -160,6 +168,7 @@ class EGoChargerCtl {
         } else {
             // No charging
             this.doCharging = false;
+            this.piController.reset();
         }
 
         return {
@@ -172,7 +181,7 @@ class EGoChargerCtl {
                 fields: {
                     availablePowerForLoading: availablePowerForLoading,
                     availableCurrent: availableCurrent,
-                    chargeCurrent: chargeCurrent,
+                    chargeCurrent: Math.round(Math.min(chargeCurrent, AMP_MAX)),
                     doCharging: (this.doCharging ? 1 : 0),
                     essAccuThreshold: this.essAccuThreshold,
                     basisLoading: (prioEssLoading ? 1 : 0),

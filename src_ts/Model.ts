@@ -45,7 +45,7 @@ export class Model {
         let availablePowerForLoading = 0;
 
         if (this.isModelConsistent()) {
-            const loadingPower = this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
+            const loadingPower = this.currentLoadingPower();
             const neededPowerForHome = -1 * (this.loadPower + loadingPower); //loadPower is negative
             availablePowerForLoading = this.pcs_pv_total_power - neededPowerForHome;
         }
@@ -60,6 +60,10 @@ export class Model {
         return this.status;
     }
 
+
+    public currentLoadingPower(): number {
+        return this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
+    }
 
     private updateIfDefined(oldValue: number, newValue: number): number {
 

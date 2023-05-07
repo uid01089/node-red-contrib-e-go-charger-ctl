@@ -1,13 +1,18 @@
 import { NodeProperties, Red, Node, Message } from "./node-red-types"
 import { EGoChargerCtl, InfluxDBEGoChargerCtl } from "./EGoChargerCtl";
-import { Throttle } from "./Throttle";
+import { PIDController } from "./PIDController";
+
 
 interface MyNodeProperties extends NodeProperties {
+
     nrPhases: string;
     minCurrent: string;
     essAccuThreshold: string;
     switchOnCurrent: string;
-
+    Kp: string;
+    Ki: string;
+    Kd: string;
+    sampleTime: string;
 }
 
 interface MyNode extends Node {
@@ -18,7 +23,7 @@ interface MyNode extends Node {
     switchOnCurrent: number;
     eGoChargerCtl: EGoChargerCtl;
     mqqtOld: string;
-    throttle: Throttle;
+    piController: PIDController;
 }
 
 
@@ -31,8 +36,15 @@ const func = (RED: Red) => {
         this.essAccuThreshold = parseFloat(config.essAccuThreshold);
         this.switchOnCurrent = parseFloat(config.switchOnCurrent);
 
-        this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent);
-        this.throttle = new Throttle(60000);
+        this.Kp = parseFloat(config.Kp);
+        this.Ki = parseFloat(config.Ki);
+        this.Kd = parseFloat(config.Kd);
+        this.sampleTime = parseFloat(config.sampleTime);
+
+
+        this.piController = new PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
+        this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
+
         this.mqqtOld = "";
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias

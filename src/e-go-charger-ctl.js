@@ -10,15 +10,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const EGoChargerCtl_1 = require("./EGoChargerCtl");
-const Throttle_1 = require("./Throttle");
+const PIDController_1 = require("./PIDController");
 const func = (RED) => {
     const eGoChargerCtl = function (config) {
         this.nrPhases = parseFloat(config.nrPhases);
         this.minCurrent = parseFloat(config.minCurrent);
         this.essAccuThreshold = parseFloat(config.essAccuThreshold);
         this.switchOnCurrent = parseFloat(config.switchOnCurrent);
-        this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent);
-        this.throttle = new Throttle_1.Throttle(60000);
+        this.Kp = parseFloat(config.Kp);
+        this.Ki = parseFloat(config.Ki);
+        this.Kd = parseFloat(config.Kd);
+        this.sampleTime = parseFloat(config.sampleTime);
+        this.piController = new PIDController_1.PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
+        this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
         this.mqqtOld = "";
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node = this;

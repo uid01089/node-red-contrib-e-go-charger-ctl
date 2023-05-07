@@ -1,31 +1,31 @@
-// https://www.telerik.com/blogs/debouncing-and-throttling-in-javascript
-
+// Define a TypeScript class called "Throttle"
 class Throttle {
+    // Declare instance variables
+    private timeout: number;       // The amount of time to wait before executing the function
+    private triggerId: NodeJS.Timeout;  // The ID of the current timeout
 
-    private timeout: number;
-    private triggerId: NodeJS.Timeout;
-
+    // Constructor function, which is called when a new instance of the class is created
     constructor(timeout: number) {
-
+        // Initialize instance variables with constructor argument
         this.timeout = timeout;
+        // Set the initial value of triggerId to null
         this.triggerId = null;
     }
 
+    // Method to trigger a function with a throttle
     public trigger(fct: () => void): void {
-
-        // Cancel running timeout
+        // If no timeout is currently running
         if (this.triggerId === null) {
+            // Execute the function
             fct();
+            // Set a new timeout to prevent the function from being called again for the given time period
             this.triggerId = setTimeout(() => {
                 this.triggerId = null;
             }, this.timeout);
-
-
         }
-
-        // Retrigger new timeout
-
+        // If a timeout is currently running, do nothing
     }
 }
 
-export { Throttle }
+// Export the "Throttle" class so it can be used in other modules
+export { Throttle };
