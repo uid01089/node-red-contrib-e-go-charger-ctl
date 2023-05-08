@@ -157,10 +157,10 @@ class EGoChargerCtl {
                     if (availableCurrentForCharging >= this.switchOnCurrent) {
                         this.doCharging = true;
 
-                        // chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+                        chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
 
-                        this.piController.setStartValue(finalCalculatedCurrentForCharging);
-                        chargeCurrent = finalCalculatedCurrentForCharging;
+                        //this.piController.setStartValue(finalCalculatedCurrentForCharging);
+                        //chargeCurrent = finalCalculatedCurrentForCharging;
 
                     } else {
                         this.doCharging = false;
