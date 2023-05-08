@@ -36,7 +36,8 @@ const eGoChargerStatus = {
 function execute(power) {
     eGoChargerStatus.fields.powerL1 = power;
     essInfoStatistics.fields.load_power = -100 - power;
-    const result = charger.trigger([essInfoStatistics, eGoChargerStatus, essCommonInfoBATT]);
+    charger.trigger([essInfoStatistics, eGoChargerStatus, essCommonInfoBATT]);
+    const result = charger.doControl();
     console.log(`Charging ${eGoChargerStatus.fields.powerL1} - LoadPower ${essInfoStatistics.fields.load_power} : ${result.chargeCurrent}`);
     return result.chargeCurrent;
 }

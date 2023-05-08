@@ -5,6 +5,7 @@ import { PIDController } from "./PIDController";
 
 
 
+
 const AMP_MAX = 16;
 const V_GRID = 230;
 
@@ -41,6 +42,8 @@ class EGoChargerCtl {
     piController: PIDController;
 
 
+
+
     constructor(nrPhases: number, minCurrent: number, essAccuThreshold: number, switchOnCurrent: number, piController: PIDController) {
         this.nrPhases = nrPhases;
         this.minCurrent = minCurrent;
@@ -52,7 +55,14 @@ class EGoChargerCtl {
     }
 
 
-    trigger(message: InfluxDBBatchElement[]): ChargingControl {
+    trigger(message: InfluxDBBatchElement[]): void {
+
+        // feeding model with new message
+        this.model.trigger(message);
+
+    }
+
+    doControl(): ChargingControl {
 
         let chargingControl: ChargingControl = {
             chargeCurrent: this.minCurrent,
@@ -61,11 +71,6 @@ class EGoChargerCtl {
             isCarConnected: false,
             influxDb: null
         };
-
-        // feeding model with new message
-        this.model.trigger(message);
-
-
 
         if (this.model.isModelConsistent()) {
             // All needed values available, do controlling
@@ -112,8 +117,8 @@ class EGoChargerCtl {
 
 
         const availablePowerForCharging = this.model.calcAvailablePower();
-        const currentEGOChargingPower = Math.round((this.model.currentEGOChargingPower() / this.nrPhases) / V_GRID);
-        const availableCurrentForCharging = Math.round((availablePowerForCharging / this.nrPhases) / V_GRID);
+        const currentEGOChargingPower = (this.model.currentEGOChargingPower() / this.nrPhases) / V_GRID;
+        const availableCurrentForCharging = (availablePowerForCharging / this.nrPhases) / V_GRID;
         const finalCalculatedCurrentForCharging = this.calcChargeCurrent(prioEssLoading, availableCurrentForCharging);
         let chargeCurrent = 0;
 

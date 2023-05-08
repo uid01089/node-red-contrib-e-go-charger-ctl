@@ -2,21 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Model = void 0;
 class Model {
-    trigger(message) {
-        this.batConvPower = this.updateIfDefined(this.batConvPower, this.getData(message, "EssInfoStatistics", "batconv_power"));
-        this.gridPower = this.updateIfDefined(this.gridPower, this.getData(message, "EssInfoStatistics", "grid_power"));
-        this.loadPower = this.updateIfDefined(this.loadPower, this.getData(message, "EssInfoStatistics", "load_power"));
-        this.pcs_pv_total_power = this.updateIfDefined(this.pcs_pv_total_power, this.getData(message, "EssInfoStatistics", "pcs_pv_total_power"));
-        this.soc = this.updateIfDefined(this.soc, this.getData(message, "EssCommonInfoBATT", "soc"));
-        this.loadingPower1 = this.updateIfDefined(this.loadingPower1, this.getData(message, "EGoChargerStatus", "powerL1"));
-        this.loadingPower2 = this.updateIfDefined(this.loadingPower2, this.getData(message, "EGoChargerStatus", "powerL2"));
-        this.loadingPower3 = this.updateIfDefined(this.loadingPower3, this.getData(message, "EGoChargerStatus", "powerL3"));
-        this.status = this.updateIfDefined(this.loadingPower3, this.getData(message, "EGoChargerStatus", "status"));
+    trigger(messages) {
+        this.loadPower = this.updateIfDefined(this.loadPower, this.getData(messages, "EssInfoStatistics", "load_power"));
+        this.pcs_pv_total_power = this.updateIfDefined(this.pcs_pv_total_power, this.getData(messages, "EssInfoStatistics", "pcs_pv_total_power"));
+        this.soc = this.updateIfDefined(this.soc, this.getData(messages, "EssCommonInfoBATT", "soc"));
+        this.loadingPower1 = this.updateIfDefined(this.loadingPower1, this.getData(messages, "EGoChargerStatus", "powerL1"));
+        this.loadingPower2 = this.updateIfDefined(this.loadingPower2, this.getData(messages, "EGoChargerStatus", "powerL2"));
+        this.loadingPower3 = this.updateIfDefined(this.loadingPower3, this.getData(messages, "EGoChargerStatus", "powerL3"));
+        this.status = this.updateIfDefined(this.loadingPower3, this.getData(messages, "EGoChargerStatus", "status"));
     }
     isModelConsistent() {
         return (true //
-            && (undefined !== this.batConvPower) //
-            && (undefined !== this.gridPower) //
             && (undefined !== this.loadPower) //
             && (undefined !== this.pcs_pv_total_power) //
             && (undefined !== this.soc) //

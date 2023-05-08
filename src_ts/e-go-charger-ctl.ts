@@ -1,6 +1,7 @@
 import { NodeProperties, Red, Node, Message } from "./node-red-types"
 import { EGoChargerCtl, InfluxDBEGoChargerCtl } from "./EGoChargerCtl";
 import { PIDController } from "./PIDController";
+import { Throttle } from "./Throttle";
 
 
 interface MyNodeProperties extends NodeProperties {
@@ -13,6 +14,7 @@ interface MyNodeProperties extends NodeProperties {
     Ki: string;
     Kd: string;
     sampleTime: string;
+
 }
 
 interface MyNode extends Node {
@@ -23,6 +25,7 @@ interface MyNode extends Node {
     switchOnCurrent: number;
     eGoChargerCtl: EGoChargerCtl;
     piController: PIDController;
+    throttle: Throttle;
 }
 
 
@@ -42,7 +45,9 @@ const func = (RED: Red) => {
 
 
         this.piController = new PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
+        this.throttle = new Throttle(this.sampleTime * 60000);
         this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
+
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node: MyNode = this;
@@ -57,30 +62,34 @@ const func = (RED: Red) => {
         node.on("input", async function (msg, send, done) {
             try {
                 const eGoChargerCtl = node.eGoChargerCtl;
-
+                const throttle = node.throttle;
 
                 const message = msg.payload;
 
                 if (message !== undefined && message !== null) {
 
                     // Always handle message
-                    const chargingControl = eGoChargerCtl.trigger(message);
+                    eGoChargerCtl.trigger(message);
 
-                    node.log(msg);
+                    throttle.trigger(() => {
 
-                    // For maximum backwards compatibility, check that send exists.
-                    // If this node is installed in Node-RED 0.x, it will need to
-                    // fallback to using `node.send`
-                    // eslint-disable-next-line prefer-spread, prefer-rest-params
-                    send = send || function () { node.send.apply(node, arguments) }
+                        const chargingControl = eGoChargerCtl.doControl();
+                        node.log(msg);
+
+                        // For maximum backwards compatibility, check that send exists.
+                        // If this node is installed in Node-RED 0.x, it will need to
+                        // fallback to using `node.send`
+                        // eslint-disable-next-line prefer-spread, prefer-rest-params
+                        send = send || function () { node.send.apply(node, arguments) }
 
 
-                    send([
-                        { payload: "" + chargingControl.doCharging },
-                        { payload: "" + chargingControl.chargeCurrent },
-                        { payload: "" + chargingControl.mode },
-                        (chargingControl.influxDb !== null ? { payload: [chargingControl.influxDb] } : null)
-                    ]);
+                        send([
+                            { payload: "" + chargingControl.doCharging },
+                            { payload: "" + chargingControl.chargeCurrent },
+                            { payload: "" + chargingControl.mode },
+                            (chargingControl.influxDb !== null ? { payload: [chargingControl.influxDb] } : null)
+                        ]);
+                    });
 
 
                 }

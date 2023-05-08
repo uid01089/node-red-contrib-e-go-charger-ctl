@@ -15,6 +15,10 @@ class EGoChargerCtl {
         this.piController = piController;
     }
     trigger(message) {
+        // feeding model with new message
+        this.model.trigger(message);
+    }
+    doControl() {
         let chargingControl = {
             chargeCurrent: this.minCurrent,
             doCharging: false,
@@ -22,8 +26,6 @@ class EGoChargerCtl {
             isCarConnected: false,
             influxDb: null
         };
-        // feeding model with new message
-        this.model.trigger(message);
         if (this.model.isModelConsistent()) {
             // All needed values available, do controlling
             chargingControl = this.control();
@@ -51,8 +53,8 @@ class EGoChargerCtl {
         //prioEssLoading: Limit chargeCurrent to this.switchOnCurrent
         //!prioEssLoading (Car-Loading): as much as available
         const availablePowerForCharging = this.model.calcAvailablePower();
-        const currentEGOChargingPower = Math.round((this.model.currentEGOChargingPower() / this.nrPhases) / V_GRID);
-        const availableCurrentForCharging = Math.round((availablePowerForCharging / this.nrPhases) / V_GRID);
+        const currentEGOChargingPower = (this.model.currentEGOChargingPower() / this.nrPhases) / V_GRID;
+        const availableCurrentForCharging = (availablePowerForCharging / this.nrPhases) / V_GRID;
         const finalCalculatedCurrentForCharging = this.calcChargeCurrent(prioEssLoading, availableCurrentForCharging);
         let chargeCurrent = 0;
         if (availablePowerForCharging > 0) {
