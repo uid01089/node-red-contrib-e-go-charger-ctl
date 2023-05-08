@@ -23,7 +23,6 @@ const func = (RED) => {
         this.sampleTime = parseFloat(config.sampleTime);
         this.piController = new PIDController_1.PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
         this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
-        this.mqqtOld = "";
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node = this;
         RED.nodes.createNode(node, config);

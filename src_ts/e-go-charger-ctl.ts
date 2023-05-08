@@ -22,7 +22,6 @@ interface MyNode extends Node {
     essAccuThreshold: number;
     switchOnCurrent: number;
     eGoChargerCtl: EGoChargerCtl;
-    mqqtOld: string;
     piController: PIDController;
 }
 
@@ -44,8 +43,6 @@ const func = (RED: Red) => {
 
         this.piController = new PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
         this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
-
-        this.mqqtOld = "";
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node: MyNode = this;

@@ -45,9 +45,15 @@ export class Model {
         let availablePowerForLoading = 0;
 
         if (this.isModelConsistent()) {
-            const loadingPower = this.currentLoadingPower();
-            const neededPowerForHome = -1 * (this.loadPower + loadingPower); //loadPower is negative
+            const currentEGOChargingPower = this.currentEGOChargingPower();
+
+            // Load power contains the power for home including the E-Go charging power.
+            // Charging power has to subtracted 
+
+            const neededPowerForHome = (-1 * this.loadPower) - currentEGOChargingPower; //loadPower is negative, consumption of home power
+
             availablePowerForLoading = this.pcs_pv_total_power - neededPowerForHome;
+
         }
         return availablePowerForLoading;
     }
@@ -61,7 +67,7 @@ export class Model {
     }
 
 
-    public currentLoadingPower(): number {
+    public currentEGOChargingPower(): number {
         return this.loadingPower1 + this.loadingPower2 + this.loadingPower3;
     }
 

@@ -43,6 +43,12 @@
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch test",
+            "program": "${workspaceFolder}/src_ts/test.ts"
         }
     ]
 }

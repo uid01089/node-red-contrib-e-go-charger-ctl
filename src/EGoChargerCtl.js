@@ -50,19 +50,19 @@ class EGoChargerCtl {
         const prioEssLoading = this.model.getSoc() < this.essAccuThreshold;
         //prioEssLoading: Limit chargeCurrent to this.switchOnCurrent
         //!prioEssLoading (Car-Loading): as much as available
-        const availablePowerForLoading = this.model.calcAvailablePower();
-        const currentCurrent = Math.round((this.model.currentLoadingPower() / this.nrPhases) / V_GRID);
-        const availableCurrent = Math.round((availablePowerForLoading / this.nrPhases) / V_GRID);
-        const chargeCurrentCalculated = this.calcChargeCurrent(prioEssLoading, availableCurrent);
+        const availablePowerForCharging = this.model.calcAvailablePower();
+        const currentEGOChargingPower = Math.round((this.model.currentEGOChargingPower() / this.nrPhases) / V_GRID);
+        const availableCurrentForCharging = Math.round((availablePowerForCharging / this.nrPhases) / V_GRID);
+        const finalCalculatedCurrentForCharging = this.calcChargeCurrent(prioEssLoading, availableCurrentForCharging);
         let chargeCurrent = 0;
-        if (availablePowerForLoading > 0) {
+        if (availablePowerForCharging > 0) {
             // We have additional power available. Do charging
             switch (this.doCharging) {
                 case true:
                     // we are in charging mode, have to stay above minCurrent
-                    if (availableCurrent >= this.minCurrent) {
+                    if (availableCurrentForCharging >= this.minCurrent) {
                         // go on charging with current calculated charging current
-                        chargeCurrent = this.piController.updateWithValue(currentCurrent, chargeCurrentCalculated);
+                        chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
                     }
                     else {
                         // Oh no, we are under minCurrent. Usually we shall stop charging
@@ -75,16 +75,17 @@ class EGoChargerCtl {
                             // Everything for the car
                             // we are over 80%, we can go on loading with this.minCurrent, even minCurrent is not reached
                             // ESS us discharged
-                            chargeCurrent = Math.max(this.piController.updateWithValue(currentCurrent, this.minCurrent), this.minCurrent);
+                            chargeCurrent = Math.max(this.piController.updateWithValue(currentEGOChargingPower, this.minCurrent), this.minCurrent);
                         }
                     }
                     break;
                 case false:
                     // we have to reach switchOnCurrent
-                    if (availableCurrent >= this.switchOnCurrent) {
+                    if (availableCurrentForCharging >= this.switchOnCurrent) {
                         this.doCharging = true;
-                        this.piController.setStartValue(currentCurrent);
-                        chargeCurrent = chargeCurrentCalculated;
+                        // chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+                        this.piController.setStartValue(finalCalculatedCurrentForCharging);
+                        chargeCurrent = finalCalculatedCurrentForCharging;
                     }
                     else {
                         this.doCharging = false;
@@ -98,6 +99,8 @@ class EGoChargerCtl {
             this.doCharging = false;
             this.piController.reset();
         }
+        // Rounding and converting to integer values
+        chargeCurrent = Math.round(Math.min(chargeCurrent, AMP_MAX));
         return {
             chargeCurrent: chargeCurrent,
             doCharging: this.doCharging,
@@ -106,9 +109,9 @@ class EGoChargerCtl {
             influxDb: {
                 measurement: "EGoChargerStatusCtl",
                 fields: {
-                    availablePowerForLoading: availablePowerForLoading,
-                    availableCurrent: availableCurrent,
-                    chargeCurrent: Math.round(Math.min(chargeCurrent, AMP_MAX)),
+                    availablePowerForLoading: availablePowerForCharging,
+                    availableCurrent: availableCurrentForCharging,
+                    chargeCurrent: chargeCurrent,
                     doCharging: (this.doCharging ? 1 : 0),
                     essAccuThreshold: this.essAccuThreshold,
                     basisLoading: (prioEssLoading ? 1 : 0),
