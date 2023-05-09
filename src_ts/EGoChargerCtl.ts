@@ -27,8 +27,18 @@ interface InfluxDBEGoChargerCtl extends InfluxDBBatchElement {
         nrPhases: number,
         minCurrent: number,
         switchOnCurrent: number,
+        controllerState: number,
     }
 }
+
+enum ControllerState {
+    SwitchIntoIdle = 0,
+    Idle = 1,
+    WaitTillChargingStarts = 2,
+    Charging = 3,
+    Finished = 4,
+}
+
 
 class EGoChargerCtl {
 
@@ -37,9 +47,9 @@ class EGoChargerCtl {
     minCurrent: number;
     essAccuThreshold: number;
     switchOnCurrent: number;
-    doCharging: boolean;
     model: Model;
     piController: PIDController;
+    controllerState: ControllerState;
 
 
 
@@ -49,9 +59,9 @@ class EGoChargerCtl {
         this.minCurrent = minCurrent;
         this.essAccuThreshold = essAccuThreshold;
         this.switchOnCurrent = switchOnCurrent;
-        this.doCharging = false;
         this.model = new Model();
         this.piController = piController;
+        this.controllerState = ControllerState.SwitchIntoIdle;
     }
 
 
@@ -126,8 +136,50 @@ class EGoChargerCtl {
 
             // We have additional power available. Do charging
 
-            switch (this.doCharging) {
-                case true:
+            switch (this.controllerState) {
+
+                case ControllerState.SwitchIntoIdle:
+                    this.piController.reset();
+                    this.controllerState = ControllerState.Idle;
+                // falls through
+
+                case ControllerState.Idle:
+
+                    if (this.model.getStatus() != 1) {
+                        // Stay in this sate
+                        break;
+                    }
+
+                    // we have to reach switchOnCurrent
+                    if (availableCurrentForCharging >= this.switchOnCurrent) {
+
+                        this.controllerState = ControllerState.WaitTillChargingStarts;
+
+                        chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+
+                        //this.piController.setStartValue(finalCalculatedCurrentForCharging);
+                        //chargeCurrent = finalCalculatedCurrentForCharging;
+
+                    }
+                    break;
+
+                case ControllerState.WaitTillChargingStarts:
+                    if (this.model.getStatus() != 2) {
+                        // Stay in this sate
+
+                        break;
+                    }
+
+                    this.controllerState = ControllerState.Charging;
+                // falls through
+
+                case ControllerState.Charging:
+
+                    // If status of wallbox is not in charging state anymore     
+                    if (this.model.getStatus() != 2) {
+                        this.controllerState = ControllerState.SwitchIntoIdle;
+                        break;
+                    }
 
                     // we are in charging mode, have to stay above minCurrent
                     if (availableCurrentForCharging >= this.minCurrent) {
@@ -142,8 +194,7 @@ class EGoChargerCtl {
                         if (prioEssLoading) {
 
                             // ESS loading has higher priority, stop charging of the car
-                            this.doCharging = false;
-                            this.piController.reset();
+                            this.controllerState = ControllerState.SwitchIntoIdle;
 
                         } else {
 
@@ -156,28 +207,11 @@ class EGoChargerCtl {
                         }
                     }
                     break;
-                case false:
-
-                    // we have to reach switchOnCurrent
-                    if (availableCurrentForCharging >= this.switchOnCurrent) {
-                        this.doCharging = true;
-
-                        chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
-
-                        //this.piController.setStartValue(finalCalculatedCurrentForCharging);
-                        //chargeCurrent = finalCalculatedCurrentForCharging;
-
-                    } else {
-                        this.doCharging = false;
-                        this.piController.reset();
-                    }
-                    break;
             }
 
         } else {
             // No charging
-            this.doCharging = false;
-            this.piController.reset();
+            this.controllerState = ControllerState.SwitchIntoIdle;
         }
 
         // Rounding and converting to integer values
@@ -185,7 +219,7 @@ class EGoChargerCtl {
 
         return {
             chargeCurrent: chargeCurrent,
-            doCharging: this.doCharging,
+            doCharging: this.isCharging(),
             mode: (prioEssLoading ? "BasisLoading" : "HighPowerLoading"),
             isCarConnected: false,
             influxDb: {
@@ -194,15 +228,20 @@ class EGoChargerCtl {
                     availablePowerForLoading: availablePowerForCharging,
                     availableCurrent: availableCurrentForCharging,
                     chargeCurrent: chargeCurrent,
-                    doCharging: (this.doCharging ? 1 : 0),
+                    doCharging: (this.isCharging() ? 1 : 0),
                     essAccuThreshold: this.essAccuThreshold,
                     basisLoading: (prioEssLoading ? 1 : 0),
                     nrPhases: this.nrPhases,
                     minCurrent: this.minCurrent,
-                    switchOnCurrent: this.switchOnCurrent
+                    switchOnCurrent: this.switchOnCurrent,
+                    controllerState: this.controllerState
                 }
             }
         };
+    }
+
+    private isCharging(): boolean {
+        return (this.controllerState === ControllerState.WaitTillChargingStarts) || (this.controllerState === ControllerState.Charging);
     }
 
 

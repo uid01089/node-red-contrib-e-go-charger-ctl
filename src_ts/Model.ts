@@ -58,6 +58,10 @@ export class Model {
         return this.soc;
     }
 
+    /**
+     * Returns the status of the Charger
+     * @returns unknown/Error=0, Idle=1, Charging=2, WaitCar=3, Complete=4, Error=5  
+     */
     public getStatus(): number {
         return this.status;
     }

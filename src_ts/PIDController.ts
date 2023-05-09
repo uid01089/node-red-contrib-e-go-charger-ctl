@@ -71,12 +71,4 @@ export class PIDController {
         this.lastError = 0;
     }
 
-    /**
-     * Method to set the initial value of the integral error based on a desired starting value.
-     * @param value The desired starting value for the process being controlled
-     */
-    setStartValue(value: number): void {
-        // Calculate and set the initial value of the integral error based on the desired starting value and the integral gain
-        this.accumulationOfErrors = value / this.Ki;
-    }
 }
