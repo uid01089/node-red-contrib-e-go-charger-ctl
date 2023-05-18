@@ -145,7 +145,7 @@ class EGoChargerCtl {
 
                 case ControllerState.Idle:
 
-                    if (this.model.getStatus() != 1) {
+                    if (this.model.getStatus() == 0) {
                         // Stay in this sate
                         break;
                     }
