@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const EGoChargerCtl_1 = require("./EGoChargerCtl");
 const PIDController_1 = require("./PIDController");
 const Throttle_1 = require("./Throttle");
+const SchmittTrigger_1 = require("./SchmittTrigger");
 const func = (RED) => {
     const eGoChargerCtl = function (config) {
         this.nrPhases = parseFloat(config.nrPhases);
@@ -23,8 +24,9 @@ const func = (RED) => {
         this.Kd = parseFloat(config.Kd);
         this.sampleTime = parseFloat(config.sampleTime);
         this.piController = new PIDController_1.PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
+        this.schmittTrigger = new SchmittTrigger_1.SchmittTrigger(1);
         this.throttle = new Throttle_1.Throttle(this.sampleTime * 60000);
-        this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
+        this.eGoChargerCtl = new EGoChargerCtl_1.EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController, this.schmittTrigger);
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const node = this;
         RED.nodes.createNode(node, config);

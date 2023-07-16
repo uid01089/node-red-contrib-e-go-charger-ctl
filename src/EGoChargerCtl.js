@@ -13,13 +13,14 @@ var ControllerState;
     ControllerState[ControllerState["Finished"] = 4] = "Finished";
 })(ControllerState || (ControllerState = {}));
 class EGoChargerCtl {
-    constructor(nrPhases, minCurrent, essAccuThreshold, switchOnCurrent, piController) {
+    constructor(nrPhases, minCurrent, essAccuThreshold, switchOnCurrent, piController, schmittTrigger) {
         this.nrPhases = nrPhases;
         this.minCurrent = minCurrent;
         this.essAccuThreshold = essAccuThreshold;
         this.switchOnCurrent = switchOnCurrent;
         this.model = new Model_1.Model();
         this.piController = piController;
+        this.schmittTrigger = schmittTrigger;
         this.controllerState = ControllerState.SwitchIntoIdle;
     }
     trigger(message) {
@@ -80,7 +81,8 @@ class EGoChargerCtl {
                     // we have to reach switchOnCurrent
                     if (availableCurrentForCharging >= this.switchOnCurrent) {
                         this.controllerState = ControllerState.WaitTillChargingStarts;
-                        chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+                        //chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+                        chargeCurrent = this.schmittTrigger.getFilteredValue(finalCalculatedCurrentForCharging);
                         //this.piController.setStartValue(finalCalculatedCurrentForCharging);
                         //chargeCurrent = finalCalculatedCurrentForCharging;
                     }
@@ -101,7 +103,8 @@ class EGoChargerCtl {
                     // we are in charging mode, have to stay above minCurrent
                     if (availableCurrentForCharging >= this.minCurrent) {
                         // go on charging with current calculated charging current
-                        chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+                        //chargeCurrent = this.piController.updateWithValue(currentEGOChargingPower, finalCalculatedCurrentForCharging);
+                        chargeCurrent = this.schmittTrigger.getFilteredValue(finalCalculatedCurrentForCharging);
                     }
                     else {
                         // Oh no, we are under minCurrent. Usually we shall stop charging
@@ -113,7 +116,8 @@ class EGoChargerCtl {
                             // Everything for the car
                             // we are over 80%, we can go on loading with this.minCurrent, even minCurrent is not reached
                             // ESS us discharged
-                            chargeCurrent = Math.max(this.piController.updateWithValue(currentEGOChargingPower, this.minCurrent), this.minCurrent);
+                            chargeCurrent = Math.max(this.schmittTrigger.getFilteredValue(finalCalculatedCurrentForCharging), this.minCurrent);
+                            //chargeCurrent = Math.max(this.piController.updateWithValue(currentEGOChargingPower, Math.max(finalCalculatedCurrentForCharging, this.minCurrent), this.minCurrent);
                         }
                     }
                     break;

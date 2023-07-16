@@ -2,6 +2,7 @@ import { NodeProperties, Red, Node, Message } from "./node-red-types"
 import { EGoChargerCtl, InfluxDBEGoChargerCtl } from "./EGoChargerCtl";
 import { PIDController } from "./PIDController";
 import { Throttle } from "./Throttle";
+import { SchmittTrigger } from "./SchmittTrigger";
 
 
 interface MyNodeProperties extends NodeProperties {
@@ -25,6 +26,7 @@ interface MyNode extends Node {
     switchOnCurrent: number;
     eGoChargerCtl: EGoChargerCtl;
     piController: PIDController;
+    schmittTrigger: SchmittTrigger;
     throttle: Throttle;
 }
 
@@ -45,8 +47,9 @@ const func = (RED: Red) => {
 
 
         this.piController = new PIDController(this.Kp, this.Ki, this.Kd, this.sampleTime);
+        this.schmittTrigger = new SchmittTrigger(1);
         this.throttle = new Throttle(this.sampleTime * 60000);
-        this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController);
+        this.eGoChargerCtl = new EGoChargerCtl(this.nrPhases, this.minCurrent, this.essAccuThreshold, this.switchOnCurrent, this.piController, this.schmittTrigger);
 
 
         // eslint-disable-next-line @typescript-eslint/no-this-alias
