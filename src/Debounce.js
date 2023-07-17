@@ -1,7 +1,8 @@
 "use strict";
-// https://www.telerik.com/blogs/debouncing-and-throttling-in-javascript
+// debouncing behaves like grouping multiple events into one single event.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Debounce = void 0;
+// https://www.telerik.com/blogs/debouncing-and-throttling-in-javascript
 class Debounce {
     constructor(timeout) {
         this.timeout = timeout;

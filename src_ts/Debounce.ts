@@ -1,3 +1,5 @@
+// debouncing behaves like grouping multiple events into one single event.
+
 // https://www.telerik.com/blogs/debouncing-and-throttling-in-javascript
 
 class Debounce {
